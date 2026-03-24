@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-dispatcher"
+version = "1.0.0"
+description = "Concurrent task dispatcher for parallel agent execution"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Darshankumar Joshi", email = "darshjme@gmail.com" }]
+requires-python = ">=3.10"
+dependencies = []
+keywords = ["agent", "dispatcher", "parallel", "concurrent", "llm", "threading"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Distributed Computing",
+]
+
+[project.urls]
+Homepage = "https://github.com/darshjme-codes/agent-dispatcher"
+Repository = "https://github.com/darshjme-codes/agent-dispatcher"
+"Bug Tracker" = "https://github.com/darshjme-codes/agent-dispatcher/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent_dispatcher*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

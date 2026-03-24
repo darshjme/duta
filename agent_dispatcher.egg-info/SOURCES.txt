@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+agent_dispatcher/__init__.py
+agent_dispatcher/decorators.py
+agent_dispatcher/dispatcher.py
+agent_dispatcher/result.py
+agent_dispatcher/task.py
+agent_dispatcher.egg-info/PKG-INFO
+agent_dispatcher.egg-info/SOURCES.txt
+agent_dispatcher.egg-info/dependency_links.txt
+agent_dispatcher.egg-info/top_level.txt
+tests/test_decorators.py
+tests/test_dispatcher.py
+tests/test_result.py
+tests/test_task.py

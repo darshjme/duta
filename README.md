@@ -1,0 +1,153 @@
+# agent-dispatcher
+
+**Concurrent task dispatcher for parallel agent execution.**  
+Zero dependencies · Python ≥ 3.10 · `concurrent.futures` under the hood.
+
+```
+pip install agent-dispatcher
+```
+
+---
+
+## Why?
+
+Running 10 agent tasks sequentially takes 10× longer than running them in parallel.  
+Without a dispatcher, developers write ad-hoc threading code that's hard to test and prone to race conditions.  
+**agent-dispatcher** solves this in < 10 lines.
+
+---
+
+## Quick start
+
+```python
+from agent_dispatcher import Dispatcher, Task
+
+def fetch_summary(url: str) -> str:
+    import urllib.request
+    with urllib.request.urlopen(url, timeout=5) as r:
+        return r.read(200).decode()
+
+urls = ["https://example.com", "https://python.org", "https://github.com"]
+tasks = [Task(id=url, func=fetch_summary, args=(url,)) for url in urls]
+
+with Dispatcher(max_workers=10) as d:
+    results = d.dispatch(tasks)
+
+for r in results:
+    print(r.task_id, "✓" if r.success else "✗", f"{r.duration_ms:.0f}ms")
+```
+
+---
+
+## Parallel LLM calls example
+
+```python
+from agent_dispatcher import dispatch_parallel
+
+# Imagine `llm_complete` wraps your favourite LLM SDK call
+def llm_complete(prompt: str) -> str:
+    # e.g. openai.chat.completions.create(...)
+    ...
+
+@dispatch_parallel(max_workers=10)
+def call_llm(prompt: str) -> str:
+    return llm_complete(prompt)
+
+prompts = [
+    ("Summarise the French Revolution in 2 sentences.",),
+    ("Explain quantum entanglement to a 10-year-old.",),
+    ("Write a haiku about distributed systems.",),
+    ("What is the capital of Burkina Faso?",),
+    ("Give me 3 Python tips for writing faster loops.",),
+]
+
+answers = call_llm(prompts)   # all 5 fire in parallel!
+for prompt, answer in zip(prompts, answers):
+    print(f"Q: {prompt[0]}\nA: {answer}\n")
+```
+
+Sequential time for 5 × 2 s calls: **10 s**.  
+Parallel time with `max_workers=10`: **≈ 2 s**.  
+**5× speedup out of the box.**
+
+---
+
+## API Reference
+
+### `Task`
+
+```python
+Task(
+    id: str,
+    func: Callable,
+    args: tuple = (),
+    kwargs: dict = None,
+    priority: int = 0,
+)
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `str` | Unique task identifier |
+| `func` | `Callable` | Function to execute |
+| `args` | `tuple` | Positional arguments |
+| `kwargs` | `dict` | Keyword arguments |
+| `priority` | `int` | User-defined ordering hint |
+| `status` | `str` | `pending` → `running` → `completed` / `failed` / `timeout` |
+| `result` | `Any` | Return value on success |
+| `error` | `str\|None` | Exception message on failure |
+| `duration_ms` | `float\|None` | Wall-clock execution time |
+
+`task.to_dict()` → serialisable dict.
+
+---
+
+### `Dispatcher`
+
+```python
+Dispatcher(max_workers: int = 4, timeout_seconds: float = 30.0)
+```
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `submit(task)` | `str` | Submit one task, return task_id |
+| `dispatch(tasks)` | `list[DispatchResult]` | Run all, wait for all |
+| `dispatch_nowait(tasks)` | `dict[str, Future]` | Fire-and-forget |
+| `results` | `dict[str, DispatchResult]` | All completed results |
+| `shutdown(wait=True)` | `None` | Shut down thread pool |
+
+Also a context manager (`with Dispatcher() as d:`).
+
+---
+
+### `DispatchResult`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `task_id` | `str` | Matches originating Task id |
+| `success` | `bool` | True if no exception |
+| `result` | `Any` | Return value |
+| `error` | `str\|None` | Exception message |
+| `duration_ms` | `float` | Execution time in milliseconds |
+
+`result.to_dict()` → serialisable dict.
+
+---
+
+### `@dispatch_parallel`
+
+```python
+@dispatch_parallel(max_workers: int = 4, timeout_seconds: float = 30.0)
+def my_fn(x, y):
+    ...
+
+results = my_fn([(x1, y1), (x2, y2), ...])
+```
+
+Raises `RuntimeError` (wrapping original exception) on the first failure.
+
+---
+
+## License
+
+MIT © Darshankumar Joshi

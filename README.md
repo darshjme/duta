@@ -4,20 +4,15 @@
 
 # agent-dispatcher
 
-**Concurrent parallel task execution for LLM agents. Zero external dependencies.**
+**Concurrent task dispatcher for parallel agent execution**
 
-[![PyPI](https://img.shields.io/pypi/v/agent-dispatcher?color=blue)](https://pypi.org/project/agent-dispatcher/)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Zero deps](https://img.shields.io/badge/dependencies-zero-brightgreen)](pyproject.toml)
+[![PyPI version](https://img.shields.io/pypi/v/agent-dispatcher?color=blue&style=flat-square)](https://pypi.org/project/agent-dispatcher/) [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square)](https://python.org) [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE) [![Tests](https://img.shields.io/badge/tests-passing-brightgreen?style=flat-square)](#)
 
 ---
 
 ## The Problem
 
-Production LLM agents fail silently. Without concurrent parallel task execution, you get undefined behaviour at scale — race conditions, lost state, cascading failures, and no way to debug what went wrong.
-
-`agent-dispatcher` gives you a production-ready concurrent parallel task execution primitive with a clean API, tested edge cases, and zero configuration.
+Without a dispatcher, event handling logic scatters across every handler that checks `if event.type == ...`. Adding a new handler requires modifying existing code; removing one silently breaks others. The fan-out problem compounds with agent complexity.
 
 ## Installation
 
@@ -25,88 +20,80 @@ Production LLM agents fail silently. Without concurrent parallel task execution,
 pip install agent-dispatcher
 ```
 
-Or from source:
-
-```bash
-git clone https://github.com/darshjme/agent-dispatcher.git
-cd agent-dispatcher
-pip install -e .
-```
-
 ## Quick Start
 
 ```python
-from agent_dispatcher import *  # see API reference below
+from agent_dispatcher import Dispatcher, DispatchResult
 
-# See examples/ directory for complete working examples
+# Initialise
+instance = Dispatcher(name="my_agent")
+
+# Use
+result = instance.run()
+print(result)
 ```
 
 ## API Reference
 
-The main classes and functions are defined in `agent_dispatcher/__init__.py`.
+### `Dispatcher`
 
-Key exports: `ThreadPoolExecutor · @dispatch_parallel · result aggregation`
+```python
+class Dispatcher:
+    """
+    def __init__(self, max_workers: int = 4, timeout_seconds: float = 30.0) -> None:
+    def _get_executor(self) -> ThreadPoolExecutor:
+    def _run_task(self, task: Task) -> DispatchResult:
+```
 
-All classes follow a consistent interface:
-- Instantiate with sensible defaults
-- Compose with other arsenal libraries
-- Zero external dependencies required
+### `DispatchResult`
 
-See the source code and `tests/` directory for verified usage examples.
+```python
+class DispatchResult:
+    """Holds the outcome of a dispatched Task."""
+    def __init__(
+    def to_dict(self) -> dict:
+    def __repr__(self) -> str:
+```
+
 
 ## How It Works
 
+### Flow
+
 ```mermaid
 flowchart LR
-    A[Agent Task] --> B[agent-dispatcher]
-    B --> C{Decision}
-    C -->|success| D[✅ Result]
-    C -->|failure| E[⚠️ Handle]
-    E --> B
-
-    style B fill:#161b22,stroke:#8957e5,stroke-width:2,color:#8957e5
-    style D fill:#1a3320,stroke:#238636,color:#3fb950
-    style E fill:#3d1a1a,stroke:#f85149,color:#f85149
+    A[User Code] -->|create| B[Dispatcher]
+    B -->|configure| C[DispatchResult]
+    C -->|execute| D{Success?}
+    D -->|yes| E[Return Result]
+    D -->|no| F[Error Handler]
+    F --> G[Fallback / Retry]
+    G --> C
 ```
+
+### Sequence
 
 ```mermaid
 sequenceDiagram
-    participant Agent
-    participant AgentDispatcher as agent-dispatcher
-    participant Output
+    participant App
+    participant Dispatcher
+    participant DispatchResult
 
-    Agent->>AgentDispatcher: initialize()
-    AgentDispatcher-->>Agent: ready
-
-    loop Agent Run
-        Agent->>AgentDispatcher: process(input)
-        AgentDispatcher-->>Agent: result
-    end
-
-    Agent->>Output: deliver(result)
+    App->>+Dispatcher: initialise()
+    Dispatcher->>+DispatchResult: configure()
+    DispatchResult-->>-Dispatcher: ready
+    App->>+Dispatcher: run(context)
+    Dispatcher->>+DispatchResult: execute(context)
+    DispatchResult-->>-Dispatcher: result
+    Dispatcher-->>-App: WorkflowResult
 ```
 
 ## Philosophy
 
-Indra commands the devas in parallel — each to their domain, all at once. agent-dispatcher is that command.
+> *Indra* dispatched messengers across the cosmos; routing is the oldest form of orchestration.
 
 ---
 
-## Part of the Arsenal
-
-`agent-dispatcher` is one of six production libraries for LLM agents:
-
-| Library | Purpose |
-|---------|---------|
-| [herald](https://github.com/darshjme/herald) | Semantic task routing |
-| [engram](https://github.com/darshjme/engram) | Agent memory |
-| [sentinel](https://github.com/darshjme/sentinel) | ReAct loop guards |
-| [verdict](https://github.com/darshjme/verdict) | Agent evaluation |
-| [agent-guardrails](https://github.com/darshjme/agent-guardrails) | Output validation |
-| [agent-observability](https://github.com/darshjme/agent-observability) | Tracing & metrics |
-
-→ [arsenal](https://github.com/darshjme/arsenal) — the complete stack
-
----
+*Part of the [arsenal](https://github.com/darshjme/arsenal) — production stack for LLM agents.*
 
 *Built by [Darshankumar Joshi](https://github.com/darshjme), Gujarat, India.*

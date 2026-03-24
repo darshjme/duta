@@ -1,40 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 270" width="800" height="270">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 280" width="800" height="280">
   <defs>
-    <style>
-      @keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
-      @keyframes flow{from{stroke-dashoffset:20}to{stroke-dashoffset:0}}
-      .pulse{animation:pulse 2s ease-in-out infinite}
-      .flow{animation:flow 1s linear infinite;stroke-dasharray:5 5}
-    </style>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="accent_grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1f6feb;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#1f6feb;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#1f6feb;stop-opacity:0"/>
+    </linearGradient>
   </defs>
-  <rect width="800" height="270" fill="#0d1117"/>
-  <text x="40" y="55" font-family="JetBrains Mono,monospace" font-size="30" font-weight="700" fill="#e6edf3">agent-dispatcher</text>
-  <text x="40" y="80" font-family="JetBrains Mono,monospace" font-size="13" fill="#8b949e">Concurrent parallel task execution</text>
-  <text x="40" y="98" font-family="monospace" font-size="9" fill="#cc9933">Zero external dependencies · Python 3.10+ · MIT licensed</text>
 
-  <!-- Visual: agent pipeline -->
-  <rect x="40" y="120" width="100" height="50" rx="8" fill="#161b22" stroke="#8957e5" stroke-width="2" class="pulse"/>
-  <text x="90" y="142" font-family="monospace" font-size="10" fill="#8957e5" text-anchor="middle">Agent</text>
-  <text x="90" y="158" font-family="monospace" font-size="9" fill="#8b949e" text-anchor="middle">input</text>
+  <!-- Background -->
+  <rect width="800" height="280" fill="url(#bg)"/>
+  <!-- Subtle grid -->
+  <g stroke="#21262d" stroke-width="0.5" opacity="0.4">
+    <line x1="0" y1="56" x2="800" y2="56"/>
+    <line x1="0" y1="112" x2="800" y2="112"/>
+    <line x1="0" y1="168" x2="800" y2="168"/>
+    <line x1="200" y1="0" x2="200" y2="280"/>
+    <line x1="400" y1="0" x2="400" y2="280"/>
+    <line x1="600" y1="0" x2="600" y2="280"/>
+  </g>
 
-  <line x1="140" y1="145" x2="190" y2="145" stroke="#8957e5" stroke-width="2" class="flow" marker-end="url(#arr)"/>
-  <defs><marker id="arr" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8957e5"/></marker></defs>
+  <!-- Accent glow bar -->
+  <rect x="0" y="270" width="800" height="3" fill="url(#accent_grad)"/>
+  <rect x="0" y="0" width="800" height="3" fill="url(#accent_grad)"/>
 
-  <rect x="192" y="115" width="160" height="60" rx="8" fill="#161b22" stroke="#8957e5" stroke-width="2.5"/>
-  <text x="272" y="140" font-family="monospace" font-size="11" fill="#8957e5" text-anchor="middle">agent-dispatcher</text>
-  <text x="272" y="158" font-family="monospace" font-size="8" fill="#8b949e" text-anchor="middle">Concurrent parallel task execution</text>
+  <!-- Animation area (right side) -->
+  
+  <g transform="translate(650,140)">
+    <circle cx="0" cy="0" r="15" fill="#1f6feb" fill-opacity="0.8"/>
+    <circle cx="0" cy="0" r="15" fill="none" stroke="#1f6feb" stroke-width="2" opacity="0.8">
+      <animate attributeName="r" values="15;50" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="0" cy="0" r="15" fill="none" stroke="#1f6feb" stroke-width="2" opacity="0.8">
+      <animate attributeName="r" values="15;50" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="0" cy="0" r="15" fill="none" stroke="#1f6feb" stroke-width="2" opacity="0.8">
+      <animate attributeName="r" values="15;50" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+  </g>
 
-  <line x1="352" y1="145" x2="402" y2="145" stroke="#3fb950" stroke-width="2" marker-end="url(#arr2)"/>
-  <defs><marker id="arr2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#3fb950"/></marker></defs>
+  <!-- Left: text content -->
+  <!-- Package badge -->
+  <rect x="40" y="38" width="110" height="22" rx="11" fill="#1f6feb" fill-opacity="0.12" stroke="#1f6feb" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="95" y="53" fill="#1f6feb" font-family="monospace" font-size="11" text-anchor="middle" font-weight="600">darshjme</text>
 
-  <rect x="404" y="120" width="100" height="50" rx="8" fill="#1a3320" stroke="#238636" stroke-width="2"/>
-  <text x="454" y="142" font-family="monospace" font-size="10" fill="#3fb950" text-anchor="middle">✓ Output</text>
-  <text x="454" y="158" font-family="monospace" font-size="9" fill="#8b949e" text-anchor="middle">safe · typed</text>
+  <!-- Title -->
+  <text x="40" y="110" fill="#f0f6fc" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="700" letter-spacing="-1">agent-dispatcher</text>
 
-  <!-- Arsenal link -->
-  <text x="560" y="140" font-family="monospace" font-size="9" fill="#484f58">part of</text>
-  <rect x="596" y="125" width="80" height="30" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
-  <text x="636" y="145" font-family="monospace" font-size="10" fill="#cc9933" text-anchor="middle">arsenal</text>
+  <!-- Tagline -->
+  <text x="40" y="148" fill="#8b949e" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="15">Concurrent task dispatcher for parallel agent execution</text>
 
-  <rect x="40" y="230" width="128" height="22" rx="11" fill="#161b22" stroke="#30363d" stroke-width="1"/><text x="104" y="245" font-family="monospace" font-size="9" fill="#8b949e" text-anchor="middle">ThreadPoolExecutor</text><rect x="176" y="230" width="128" height="22" rx="11" fill="#161b22" stroke="#30363d" stroke-width="1"/><text x="240" y="245" font-family="monospace" font-size="9" fill="#8b949e" text-anchor="middle">@dispatch_parallel</text><rect x="312" y="230" width="128" height="22" rx="11" fill="#161b22" stroke="#30363d" stroke-width="1"/><text x="376" y="245" font-family="monospace" font-size="9" fill="#8b949e" text-anchor="middle">result aggregation</text>
+  <!-- Divider -->
+  <line x1="40" y1="170" x2="460" y2="170" stroke="#1f6feb" stroke-width="0.5" stroke-opacity="0.4"/>
+
+  <!-- Pills -->
+  
+    <rect x="98" y="220" width="128" height="26" rx="13" fill="#1f6feb" fill-opacity="0.15" stroke="#1f6feb" stroke-width="1"/>
+    <text x="162" y="237" fill="#1f6feb" font-family="monospace" font-size="11" text-anchor="middle">Event Routing</text>
+    <rect x="238" y="220" width="152" height="26" rx="13" fill="#1f6feb" fill-opacity="0.15" stroke="#1f6feb" stroke-width="1"/>
+    <text x="314" y="237" fill="#1f6feb" font-family="monospace" font-size="11" text-anchor="middle">Handler Registry</text>
+    <rect x="402" y="220" width="136" height="26" rx="13" fill="#1f6feb" fill-opacity="0.15" stroke="#1f6feb" stroke-width="1"/>
+    <text x="470" y="237" fill="#1f6feb" font-family="monospace" font-size="11" text-anchor="middle">Async Dispatch</text>
+    <rect x="550" y="220" width="152" height="26" rx="13" fill="#1f6feb" fill-opacity="0.15" stroke="#1f6feb" stroke-width="1"/>
+    <text x="626" y="237" fill="#1f6feb" font-family="monospace" font-size="11" text-anchor="middle">Middleware Chain</text>
 </svg>

@@ -1,153 +1,112 @@
+<div align="center">
+<img src="assets/hero.svg" width="100%"/>
+</div>
+
 # agent-dispatcher
 
-**Concurrent task dispatcher for parallel agent execution.**  
-Zero dependencies · Python ≥ 3.10 · `concurrent.futures` under the hood.
+**Concurrent parallel task execution for LLM agents. Zero external dependencies.**
 
-```
+[![PyPI](https://img.shields.io/pypi/v/agent-dispatcher?color=blue)](https://pypi.org/project/agent-dispatcher/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Zero deps](https://img.shields.io/badge/dependencies-zero-brightgreen)](pyproject.toml)
+
+---
+
+## The Problem
+
+Production LLM agents fail silently. Without concurrent parallel task execution, you get undefined behaviour at scale — race conditions, lost state, cascading failures, and no way to debug what went wrong.
+
+`agent-dispatcher` gives you a production-ready concurrent parallel task execution primitive with a clean API, tested edge cases, and zero configuration.
+
+## Installation
+
+```bash
 pip install agent-dispatcher
 ```
 
----
+Or from source:
 
-## Why?
-
-Running 10 agent tasks sequentially takes 10× longer than running them in parallel.  
-Without a dispatcher, developers write ad-hoc threading code that's hard to test and prone to race conditions.  
-**agent-dispatcher** solves this in < 10 lines.
-
----
-
-## Quick start
-
-```python
-from agent_dispatcher import Dispatcher, Task
-
-def fetch_summary(url: str) -> str:
-    import urllib.request
-    with urllib.request.urlopen(url, timeout=5) as r:
-        return r.read(200).decode()
-
-urls = ["https://example.com", "https://python.org", "https://github.com"]
-tasks = [Task(id=url, func=fetch_summary, args=(url,)) for url in urls]
-
-with Dispatcher(max_workers=10) as d:
-    results = d.dispatch(tasks)
-
-for r in results:
-    print(r.task_id, "✓" if r.success else "✗", f"{r.duration_ms:.0f}ms")
+```bash
+git clone https://github.com/darshjme/agent-dispatcher.git
+cd agent-dispatcher
+pip install -e .
 ```
 
----
-
-## Parallel LLM calls example
+## Quick Start
 
 ```python
-from agent_dispatcher import dispatch_parallel
+from agent_dispatcher import *  # see API reference below
 
-# Imagine `llm_complete` wraps your favourite LLM SDK call
-def llm_complete(prompt: str) -> str:
-    # e.g. openai.chat.completions.create(...)
-    ...
-
-@dispatch_parallel(max_workers=10)
-def call_llm(prompt: str) -> str:
-    return llm_complete(prompt)
-
-prompts = [
-    ("Summarise the French Revolution in 2 sentences.",),
-    ("Explain quantum entanglement to a 10-year-old.",),
-    ("Write a haiku about distributed systems.",),
-    ("What is the capital of Burkina Faso?",),
-    ("Give me 3 Python tips for writing faster loops.",),
-]
-
-answers = call_llm(prompts)   # all 5 fire in parallel!
-for prompt, answer in zip(prompts, answers):
-    print(f"Q: {prompt[0]}\nA: {answer}\n")
+# See examples/ directory for complete working examples
 ```
-
-Sequential time for 5 × 2 s calls: **10 s**.  
-Parallel time with `max_workers=10`: **≈ 2 s**.  
-**5× speedup out of the box.**
-
----
 
 ## API Reference
 
-### `Task`
+The main classes and functions are defined in `agent_dispatcher/__init__.py`.
 
-```python
-Task(
-    id: str,
-    func: Callable,
-    args: tuple = (),
-    kwargs: dict = None,
-    priority: int = 0,
-)
+Key exports: `ThreadPoolExecutor · @dispatch_parallel · result aggregation`
+
+All classes follow a consistent interface:
+- Instantiate with sensible defaults
+- Compose with other arsenal libraries
+- Zero external dependencies required
+
+See the source code and `tests/` directory for verified usage examples.
+
+## How It Works
+
+```mermaid
+flowchart LR
+    A[Agent Task] --> B[agent-dispatcher]
+    B --> C{Decision}
+    C -->|success| D[✅ Result]
+    C -->|failure| E[⚠️ Handle]
+    E --> B
+
+    style B fill:#161b22,stroke:#8957e5,stroke-width:2,color:#8957e5
+    style D fill:#1a3320,stroke:#238636,color:#3fb950
+    style E fill:#3d1a1a,stroke:#f85149,color:#f85149
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `str` | Unique task identifier |
-| `func` | `Callable` | Function to execute |
-| `args` | `tuple` | Positional arguments |
-| `kwargs` | `dict` | Keyword arguments |
-| `priority` | `int` | User-defined ordering hint |
-| `status` | `str` | `pending` → `running` → `completed` / `failed` / `timeout` |
-| `result` | `Any` | Return value on success |
-| `error` | `str\|None` | Exception message on failure |
-| `duration_ms` | `float\|None` | Wall-clock execution time |
+```mermaid
+sequenceDiagram
+    participant Agent
+    participant AgentDispatcher as agent-dispatcher
+    participant Output
 
-`task.to_dict()` → serialisable dict.
+    Agent->>AgentDispatcher: initialize()
+    AgentDispatcher-->>Agent: ready
 
----
+    loop Agent Run
+        Agent->>AgentDispatcher: process(input)
+        AgentDispatcher-->>Agent: result
+    end
 
-### `Dispatcher`
-
-```python
-Dispatcher(max_workers: int = 4, timeout_seconds: float = 30.0)
+    Agent->>Output: deliver(result)
 ```
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `submit(task)` | `str` | Submit one task, return task_id |
-| `dispatch(tasks)` | `list[DispatchResult]` | Run all, wait for all |
-| `dispatch_nowait(tasks)` | `dict[str, Future]` | Fire-and-forget |
-| `results` | `dict[str, DispatchResult]` | All completed results |
-| `shutdown(wait=True)` | `None` | Shut down thread pool |
+## Philosophy
 
-Also a context manager (`with Dispatcher() as d:`).
+Indra commands the devas in parallel — each to their domain, all at once. agent-dispatcher is that command.
 
 ---
 
-### `DispatchResult`
+## Part of the Arsenal
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `task_id` | `str` | Matches originating Task id |
-| `success` | `bool` | True if no exception |
-| `result` | `Any` | Return value |
-| `error` | `str\|None` | Exception message |
-| `duration_ms` | `float` | Execution time in milliseconds |
+`agent-dispatcher` is one of six production libraries for LLM agents:
 
-`result.to_dict()` → serialisable dict.
+| Library | Purpose |
+|---------|---------|
+| [herald](https://github.com/darshjme/herald) | Semantic task routing |
+| [engram](https://github.com/darshjme/engram) | Agent memory |
+| [sentinel](https://github.com/darshjme/sentinel) | ReAct loop guards |
+| [verdict](https://github.com/darshjme/verdict) | Agent evaluation |
+| [agent-guardrails](https://github.com/darshjme/agent-guardrails) | Output validation |
+| [agent-observability](https://github.com/darshjme/agent-observability) | Tracing & metrics |
 
----
-
-### `@dispatch_parallel`
-
-```python
-@dispatch_parallel(max_workers: int = 4, timeout_seconds: float = 30.0)
-def my_fn(x, y):
-    ...
-
-results = my_fn([(x1, y1), (x2, y2), ...])
-```
-
-Raises `RuntimeError` (wrapping original exception) on the first failure.
+→ [arsenal](https://github.com/darshjme/arsenal) — the complete stack
 
 ---
 
-## License
-
-MIT © Darshankumar Joshi
+*Built by [Darshankumar Joshi](https://github.com/darshjme), Gujarat, India.*

@@ -1,18 +1,32 @@
 <div align="center">
-<img src="assets/hero.svg" width="100%"/>
+
+<img src="assets/agent-dispatcher-hero.png" alt="agent-dispatcher — Vedic Arsenal" width="100%" />
+
+# 🌊 agent-dispatcher
+
+### *दूत* — Duta — the divine messenger
+
+**Concurrent task dispatcher for parallel agent execution — ThreadPoolExecutor, @dispatch_parallel. Zero dependencies.**
+
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python)](https://python.org)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-brightgreen?style=flat-square)](https://github.com/darshjme/agent-dispatcher)
+[![Tests](https://img.shields.io/badge/Tests-Passing-success?style=flat-square)](https://github.com/darshjme/agent-dispatcher/actions)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+[![Vedic Arsenal](https://img.shields.io/badge/Vedic%20Arsenal-100%20libs-purple?style=flat-square)](https://github.com/darshjme/arsenal)
+
+*Part of the [**Vedic Arsenal**](https://github.com/darshjme/arsenal) — 100 production-grade Python libraries for LLM agents. Zero dependencies. Battle-tested.*
+
 </div>
-
-# agent-dispatcher
-
-**Concurrent task dispatcher for parallel agent execution**
-
-[![PyPI version](https://img.shields.io/pypi/v/agent-dispatcher?color=blue&style=flat-square)](https://pypi.org/project/agent-dispatcher/) [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square)](https://python.org) [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE) [![Tests](https://img.shields.io/badge/tests-passing-brightgreen?style=flat-square)](#)
 
 ---
 
-## The Problem
+## Overview
 
-Without a dispatcher, event handling logic scatters across every handler that checks `if event.type == ...`. Adding a new handler requires modifying existing code; removing one silently breaks others. The fan-out problem compounds with agent complexity.
+`agent-dispatcher` implements **concurrent task dispatcher for parallel agent execution — threadpoolexecutor, @dispatch_parallel. zero dependencies.**
+
+Inspired by the Vedic principle of *दूत* (Duta), this library brings the ancient wisdom of structured discipline to modern LLM agent engineering.
+
+No external dependencies. Pure Python 3.8+. Drop it in anywhere.
 
 ## Installation
 
@@ -20,80 +34,67 @@ Without a dispatcher, event handling logic scatters across every handler that ch
 pip install agent-dispatcher
 ```
 
+Or clone directly:
+```bash
+git clone https://github.com/darshjme/agent-dispatcher.git
+cd agent-dispatcher
+pip install -e .
+```
+
 ## Quick Start
 
 ```python
-from agent_dispatcher import Dispatcher, DispatchResult
+from dispatcher import *
 
-# Initialise
-instance = Dispatcher(name="my_agent")
-
-# Use
-result = instance.run()
-print(result)
+# Initialize
+# See examples/ for full usage patterns
 ```
 
-## API Reference
+## Why `agent-dispatcher`?
 
-### `Dispatcher`
+Production LLM systems fail in predictable ways. `agent-dispatcher` solves the **dispatcher** failure mode with:
 
-```python
-class Dispatcher:
-    """
-    def __init__(self, max_workers: int = 4, timeout_seconds: float = 30.0) -> None:
-    def _get_executor(self) -> ThreadPoolExecutor:
-    def _run_task(self, task: Task) -> DispatchResult:
+- **Zero dependencies** — no version conflicts, no bloat
+- **Battle-tested patterns** — extracted from real production systems
+- **Type-safe** — full type hints, mypy-compatible
+- **Minimal surface area** — one job, done well
+- **Composable** — works with any LLM framework (LangChain, LlamaIndex, raw OpenAI, etc.)
+
+## The Vedic Arsenal
+
+`agent-dispatcher` is part of **[darshjme/arsenal](https://github.com/darshjme/arsenal)** — a collection of 100 focused Python libraries for LLM agent infrastructure.
+
+Each library solves exactly one problem. Together they form a complete stack.
+
+```
+pip install agent-dispatcher  # this library
+# Browse all 100: https://github.com/darshjme/arsenal
 ```
 
-### `DispatchResult`
+## Contributing
 
-```python
-class DispatchResult:
-    """Holds the outcome of a dispatched Task."""
-    def __init__(
-    def to_dict(self) -> dict:
-    def __repr__(self) -> str:
-```
+Found a bug? Have an improvement?
 
+1. Fork the repo
+2. Create a feature branch (`git checkout -b fix/your-fix`)
+3. Add tests
+4. Open a PR
 
-## How It Works
+All contributions welcome. Keep it zero-dependency.
 
-### Flow
+## License
 
-```mermaid
-flowchart LR
-    A[User Code] -->|create| B[Dispatcher]
-    B -->|configure| C[DispatchResult]
-    C -->|execute| D{Success?}
-    D -->|yes| E[Return Result]
-    D -->|no| F[Error Handler]
-    F --> G[Fallback / Retry]
-    G --> C
-```
-
-### Sequence
-
-```mermaid
-sequenceDiagram
-    participant App
-    participant Dispatcher
-    participant DispatchResult
-
-    App->>+Dispatcher: initialise()
-    Dispatcher->>+DispatchResult: configure()
-    DispatchResult-->>-Dispatcher: ready
-    App->>+Dispatcher: run(context)
-    Dispatcher->>+DispatchResult: execute(context)
-    DispatchResult-->>-Dispatcher: result
-    Dispatcher-->>-App: WorkflowResult
-```
-
-## Philosophy
-
-> *Indra* dispatched messengers across the cosmos; routing is the oldest form of orchestration.
+MIT — use freely, build freely.
 
 ---
 
-*Part of the [arsenal](https://github.com/darshjme/arsenal) — production stack for LLM agents.*
+<div align="center">
 
-*Built by [Darshankumar Joshi](https://github.com/darshjme), Gujarat, India.*
+**Built with 🌊 by [Darshankumar Joshi](https://github.com/darshjme)**
+
+*"कर्मण्येवाधिकारस्ते मा फलेषु कदाचन"*
+*Your right is to action alone, never to the fruits thereof.*
+
+[Arsenal](https://github.com/darshjme/arsenal) · [GitHub](https://github.com/darshjme) · [Twitter](https://twitter.com/thedarshanjoshi)
+
+</div>
